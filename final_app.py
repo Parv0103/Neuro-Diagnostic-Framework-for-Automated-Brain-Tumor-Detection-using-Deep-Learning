@@ -1,9 +1,3 @@
-"""
-Brain Tumor Detection — Streamlit App (v3 — Clean UI)
-======================================================
-Fixed: Removed lr attribute error completely
-"""
-
 import os, io, time
 from datetime import datetime
 import pandas as pd
@@ -36,7 +30,6 @@ from os import listdir
 import warnings
 warnings.filterwarnings('ignore')
 
-# ─────────────────────────────────────────────────────────────────────────────
 YES_PATH       = 'yes'
 NO_PATH        = 'no'
 AUGMENTED_PATH = 'augmented_data/'
@@ -49,9 +42,6 @@ os.makedirs(AUGMENTED_PATH + 'yes', exist_ok=True)
 os.makedirs(AUGMENTED_PATH + 'no',  exist_ok=True)
 os.makedirs(MODELS_DIR,             exist_ok=True)
 
-# ─────────────────────────────────────────────────────────────────────────────
-# CSS
-# ─────────────────────────────────────────────────────────────────────────────
 def apply_custom_css():
     st.markdown("""
     <style>
@@ -179,9 +169,7 @@ def apply_custom_css():
     })
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Helpers
-# ─────────────────────────────────────────────────────────────────────────────
+
 def hms_string(sec):
     h=int(sec/3600); m=int((sec%3600)/60); s=sec%60
     return f"{h}h {m}m {round(s,1)}s"
@@ -200,9 +188,6 @@ def stat_card(col, value, label):
     </div>""", unsafe_allow_html=True)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# ML helpers
-# ─────────────────────────────────────────────────────────────────────────────
 def crop_brain_contour(image):
     gray   = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     gray   = cv2.GaussianBlur(gray, (5,5), 0)
@@ -304,9 +289,7 @@ def analyze_image_quality(image_rgb):
             'contrast':round(contrast,1),'score':score,'grade':grade}
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Grad-CAM
-# ─────────────────────────────────────────────────────────────────────────────
+
 def make_gradcam_heatmap(img_array, model, last_conv_layer_name="conv2"):
     grad_model = tf.keras.models.Model(
         model.inputs, [model.get_layer(last_conv_layer_name).output, model.output]
@@ -330,9 +313,6 @@ def overlay_gradcam(img_rgb, heatmap, alpha=0.45):
     return cv2.addWeighted(img.astype(np.uint8), alpha, hc, 1-alpha, 0)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Training callback (COMPLETELY FIXED - no lr attribute)
-# ─────────────────────────────────────────────────────────────────────────────
 class StreamlitCallback(Callback):
     def __init__(self, total_epochs, progress_bar, status_text, chart_ph):
         super().__init__()
@@ -346,7 +326,7 @@ class StreamlitCallback(Callback):
         logs = logs or {}
         self.progress_bar.progress((epoch + 1) / self.total_epochs)
         
-        # Handle different metric naming conventions
+   
         ak = 'accuracy' if 'accuracy' in logs else 'acc'
         vak = 'val_accuracy' if 'val_accuracy' in logs else 'val_acc'
         
@@ -363,7 +343,7 @@ class StreamlitCallback(Callback):
             f"Val Loss: {logs.get('val_loss', 0):.4f} | Val Acc: {logs.get(vak, 0):.4f}"
         )
         
-        # Create plots
+        # plots
         fig, axes = plt.subplots(1, 2, figsize=(12, 4))
         
         # Loss plot
@@ -391,9 +371,7 @@ class StreamlitCallback(Callback):
         plt.close(fig)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# PAGE: Dashboard
-# ─────────────────────────────────────────────────────────────────────────────
+
 def page_dashboard():
     st.markdown("## 🧠 Brain Tumor Detection System")
     box("ℹ️",
@@ -503,9 +481,6 @@ def page_dashboard():
         "warn")
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# PAGE: Dataset Explorer
-# ─────────────────────────────────────────────────────────────────────────────
 def page_dataset_explorer():
     st.markdown("## 📊 Dataset Explorer")
 
@@ -587,9 +562,6 @@ def page_dataset_explorer():
                     f"Resize {IMG_WIDTH}×{IMG_HEIGHT} → Normalize [0,1]","info")
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# PAGE: Train
-# ─────────────────────────────────────────────────────────────────────────────
 def page_train():
     st.markdown("## 🏋️ Train Model")
 
@@ -699,9 +671,6 @@ def page_train():
         box("✅","Training complete! Go to <strong>Predict</strong> to test on new scans.","success")
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# PAGE: Predict
-# ─────────────────────────────────────────────────────────────────────────────
 def page_predict():
     st.markdown("## 🔬 Predict")
 
